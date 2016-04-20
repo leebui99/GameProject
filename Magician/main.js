@@ -34,6 +34,7 @@ Animation2.prototype.drawFrame = function (tick, ctx, x, y, scaleBy, reflect) {
     //console.log(this.frameWidth);
     //console.log(this.startX);
     if(reflect) {
+    	ctx.translate((x) * 2 + this.frameWidth,0);
     	ctx.scale(-1,1);
     }
     ctx.drawImage(this.spriteSheet,
