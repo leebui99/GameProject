@@ -10,7 +10,7 @@
     <script type="text/javascript" src="./dragdrop.js"></script>
 </head>
 <body>
-    <section id ="leftbox">
+    <section id ="leftbox" draggable="true" ondragstart="event.dataTransfer.setData('text/plain',null)">
       <canvas id="gameWorld" tabindex="1" width="800" height="700" style="border: 1px solid brown; background: lightskyblue"></canvas>
     </section>
     <section id = "rightbox">
