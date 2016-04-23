@@ -1,6 +1,6 @@
 var AM = new AssetManager();
 
-function Animation2(spriteSheet, startX, startY, frameWidth, frameHeight, sheetWidth, frameDuration, frames, loop) {
+function Animation(spriteSheet, startX, startY, frameWidth, frameHeight, sheetWidth, frameDuration, frames, loop) {
     this.spriteSheet = spriteSheet;
     this.startX = startX;
     this.startY = startY;
@@ -14,7 +14,7 @@ function Animation2(spriteSheet, startX, startY, frameWidth, frameHeight, sheetW
     this.loop = loop;
 }
 
-Animation2.prototype.drawFrame = function (tick, ctx, x, y, scaleBy, reflect) {
+Animation.prototype.drawFrame = function (tick, ctx, x, y, scaleBy, reflect) {
     var scaleBy = scaleBy || 1;
     this.elapsedTime += tick;
     if (this.loop) {
@@ -47,11 +47,11 @@ Animation2.prototype.drawFrame = function (tick, ctx, x, y, scaleBy, reflect) {
     
 }
 
-Animation2.prototype.currentFrame = function () {
+Animation.prototype.currentFrame = function () {
     return Math.floor(this.elapsedTime / this.frameDuration);
 }
 
-Animation2.prototype.isDone = function () {
+Animation.prototype.isDone = function () {
 	//console.log(this.elapsedTime >= this.totalTime);
     return (this.elapsedTime >= this.totalTime);
 }
@@ -74,12 +74,13 @@ Background.prototype.update = function () {
 };
 
 //Magician
-function Magician(game, spritesheet) {
+function Magician(game, spritesheet, spritesheet2) {
 	//this.animation = new Animation(spritesheet, 64, 64, 4, 0.15, 16, true, false);
-    this.animation = new Animation2(spritesheet, 0, 0, 64, 64, 4, 0.15, 16, true);
-    this.upAnimation = new Animation2(spritesheet, 0, 256, 64, 64, 4, 0.15, 16, true);
-    this.leftAnimation = new Animation2(spritesheet, 256, 0, 64, 64, 4, 0.15, 16, true);
-    this.attackAnimation = new Animation2(spritesheet, 256, 256, 64, 64, 4, 0.15, 16, false);
+    this.animation = new Animation(spritesheet, 0, 0, 64, 64, 4, 0.15, 16, true);
+    this.upAnimation = new Animation(spritesheet, 0, 256, 64, 64, 4, 0.15, 16, true);
+    this.leftAnimation = new Animation(spritesheet, 256, 0, 64, 64, 4, 0.15, 16, true);
+    this.rightAnimation = new Animation(spritesheet2, 0, 0, 64, 64, 4, 0.15, 16, true);
+    this.attackAnimation = new Animation(spritesheet, 256, 256, 64, 64, 4, 0.15, 16, false);
     this.up = false;
     this.down = false;
     this.right = false;
@@ -88,9 +89,9 @@ function Magician(game, spritesheet) {
     this.move = false;
     this.radius = 100;
     this.ground = 350;
-    this.xPosition = 350;
+    this.xPosition = 400;
     this.yPosition = 350;
-    Entity.call(this, game, 350, 350);//position where it start
+    Entity.call(this, game, 400, 350);//position where it start
 }
 
 Magician.prototype = new Entity();
@@ -98,74 +99,16 @@ Magician.prototype.constructor = Magician;
 
 Magician.prototype.update = function () {
 	//checking which key board is click
-	if (this.game.w) {
-		this.change("up");
-		console.log("yes");
+	if (this.game.click) {
+		this.change(this.calDir(this.game.position.x, this.game.position.y));
+		//console.log(temp);
+		//this.change(temp);
 	}
-	if (this.game.s) {
-		this.change("down");
-		console.log("yes");
-	}
-	if (this.game.a) {
-		this.change("left");
-		console.log("yes");
-	}
-	if (this.game.d) {
-		this.change("right");
-		console.log("yes");
-	}
-	if (this.game.space) {
-		this.change("space");
-		console.log("yes");
-	}
-	//move the character
-    if (this.up) {
-        if(this.move) {
-	        this.yPosition -= 15;
-	        if(this.yPosition <= 0) {
-	        	this.yPosition = 0;
-	        }
-	        this.move = false;
-        }
-        this.y = this.yPosition;
-    } else if(this.down) {
-    	if(this.move) {
-	        this.yPosition += 15;
-	        if(this.yPosition >= 645) {
-	        	this.yPosition = 645;
-	        }
-	        this.move = false;
-        }
-        this.y = this.yPosition;
-    } else if(this.right) {
-    	if(this.move) {
-	        this.xPosition += 15;
-	        if(this.xPosition >= 700) {
-	        	this.xPosition = 700;
-	        }
-	        this.move = false;
-        }
-        this.x = this.xPosition;
-    } else if(this.left) {
-    	if(this.move) {
-	        this.xPosition -= 15;
-	        if(this.xPosition <= 0) {
-	        	this.xPosition = 0;
-	        }
-	        this.move = false;
-        }
-        this.x = this.xPosition;
-    } else if(this.space) {
-    	if (this.attackAnimation.isDone()) {
-            this.attackAnimation.elapsedTime = 0;
-            this.space = false;
-        }
-    }
     
     Entity.prototype.update.call(this);
 }
 
-//a helper method for update on which dirction it should face.
+//a helper method for update on which direction it should face.
 Magician.prototype.change = function(dir) {
 	switch(dir) {
 		case "up": this.up = true; this.down = false; this.left = false; this.right = false; this.space = false; break;
@@ -178,6 +121,21 @@ Magician.prototype.change = function(dir) {
 	this.move = true;
 }
 
+//a helper method for update on which direction it should face.
+Magician.prototype.calDir = function(x, y) {
+	var nory = x*7/8;
+	var oppy = x*-7/8 + 700;
+	if(y <= nory && y <= oppy) {
+		return "up";
+	} else if(y >= nory && y <= oppy) {
+		return "left";
+	} else if(y <= nory && y >= oppy) {
+		return "right";
+	} else {
+		return "down";
+	}
+}
+
 Magician.prototype.draw = function (ctx) {
 	//console.log(this.up);
 	if (this.up) {
@@ -187,7 +145,7 @@ Magician.prototype.draw = function (ctx) {
     } else if(this.left) {
     	this.leftAnimation.drawFrame(this.game.clockTick, ctx, this.x, this.y);
     } else if(this.right) {
-    	this.leftAnimation.drawFrame(this.game.clockTick, ctx, this.x, this.y, false, true);
+    	this.rightAnimation.drawFrame(this.game.clockTick, ctx, this.x, this.y);
     } else if(this.space) {
     	this.attackAnimation.drawFrame(this.game.clockTick, ctx, this.x, this.y);
     } else {
@@ -196,8 +154,72 @@ Magician.prototype.draw = function (ctx) {
     Entity.prototype.draw.call(this);
 }
 
+//spell
+function Spell(game, spritesheet) {
+    this.animation = new Animation(spritesheet, 2, 9, 63, 60, 8, 0.30, 8, true);
+    this.oppAnimation = new Animation(spritesheet, 9, 252, 63, 60, 8, 0.30, 8, true);
+    this.xOriginal = 400;
+    this.yOriginal = 350;
+    this.xPosition = 400;
+    this.yPosition = 350;
+    this.ctx = game.ctx;
+    this.fire = false;
+    Entity.call(this, game, 400, 350);//position where it start
+}
+
+Spell.prototype = new Entity();
+Spell.prototype.constructor = Magician;
+
+Spell.prototype.update = function () {
+	if (this.game.click) {
+		this.xPosition = this.game.position.x - (this.game.position.x % 10);
+		this.yPosition = this.game.position.y - (this.game.position.y % 10);
+		//console.log(this.yOriginal);
+		this.xOriginal = 400;
+	    this.yOriginal = 350;
+		this.fire = true;
+	}
+	if(this.xOriginal < this.xPosition) {
+		this.x = this.xOriginal;
+		this.xOriginal += 5;
+	}
+	if(this.xOriginal > this.xPosition){
+		this.x = this.xOriginal;
+		this.xOriginal -= 5;
+	} 
+	if(this.yOriginal < this.yPosition) {
+		this.y = this.yOriginal;
+		this.yOriginal += 5;
+	}
+	if(this.yOriginal > this.yPosition){
+		this.y = this.yOriginal;
+		this.yOriginal -= 5;
+	} 
+	if(this.xOriginal == this.xPosition && this.yOriginal == this.yPosition) {
+		this.fire = false;
+		
+	    
+	}
+	
+    Entity.prototype.update.call(this);
+}
+
+Spell.prototype.draw = function () {
+	if(this.fire) {
+		if(this.xPosition < 400) {
+			this.animation.drawFrame(this.game.clockTick, this.ctx, this.x, this.y);
+		} else {
+			this.oppAnimation.drawFrame(this.game.clockTick, this.ctx, this.x, this.y);
+		}
+		
+	}
+    Entity.prototype.draw.call(this);
+}
+
 AM.queueDownload("./img/magician.png");
+AM.queueDownload("./img/magician2.png");
 AM.queueDownload("./img/background.jpg");
+AM.queueDownload("./img/fireball_0.png");
 
 AM.downloadAll(function () {
     var canvas = document.getElementById("gameWorld");
@@ -208,7 +230,9 @@ AM.downloadAll(function () {
     gameEngine.start();
     
     gameEngine.addEntity(new Background(gameEngine, AM.getAsset("./img/background.jpg")));
-    gameEngine.addEntity(new Magician(gameEngine, AM.getAsset("./img/magician.png")));
+    gameEngine.addEntity(new Magician(gameEngine, AM.getAsset("./img/magician.png"), 
+    		AM.getAsset("./img/magician2.png")));
+    gameEngine.addEntity(new Spell(gameEngine, AM.getAsset("./img/fireball_0.png")));
     
     console.log("All Done!");
 });
